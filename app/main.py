@@ -4,11 +4,10 @@ import uuid
 from fastapi import FastAPI, BackgroundTasks
 from pydantic import BaseModel
 
-from asr_client import voice2text
-from config import *
+from app.asr_client import voice2text
+from app.config import REDIS_CLIENT as r
 
 app = FastAPI()
-r = REDIS_CLIENT
 
 
 class AudioRequest(BaseModel):
@@ -19,7 +18,8 @@ class AudioRequest(BaseModel):
 async def start_asr_process(request: AudioRequest, background_tasks: BackgroundTasks):
     task_id = str(uuid.uuid4())
     r.set(task_id, "正在处理中")  # 设置任务状态
-    data = background_tasks.add_task(voice2text,  request.audio_url)
+    data = {"task_id": task_id, "audio_url": request.audio_url}
+    background_tasks.add_task(voice2text,  task_id=task_id,wav=request.audio_url)
     return data
 
 @app.get("/result/{task_id}")

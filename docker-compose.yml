@@ -1,0 +1,16 @@
+version: '3.11'
+
+services:
+  web:
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+    depends_on:
+      - asr-redis
+
+  asr-redis:
+    image: "redis:alpine"
+    ports:
+      - "6380:6379"
