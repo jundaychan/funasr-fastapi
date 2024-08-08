@@ -1,5 +1,4 @@
 import ssl,websockets
-import uuid
 import wave
 import asyncio
 import json
@@ -7,6 +6,7 @@ from io import BytesIO
 
 import requests
 
+from app.celery_config import celery_app
 from app.config import *
 
 
@@ -89,25 +89,8 @@ async def asr_client(task_id,wav_url):
 
 
 
-def voice2text(task_id,wav):
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
-    loop.run_until_complete(asr_client(task_id, wav))
-    loop.close()
+@celery_app.task(name='app.asr_client.voice2text')
+def voice2text(task_id, wav):
+    asyncio.run(asr_client(task_id, wav))
 
 
-if __name__ == '__main__':
-    import time
-    task_id = str(uuid.uuid4())
-    r.set(task_id, "正在处理中")  # 设置任务状态
-
-    time_start=time.time()
-    paths = ["7326135214235798284.mp3","vad_example.wav"]
-    z = voice2text(wav=paths[-1],task_id=task_id)
-    print(z)
-    text = r.get(z['task_id'])
-    print(text)
-    # voice2text(wavs=paths)
-    time_end=time.time()
-
-    print('time cost',time_end-time_start,'s')

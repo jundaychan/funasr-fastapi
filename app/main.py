@@ -4,7 +4,7 @@ import uuid
 from fastapi import FastAPI, BackgroundTasks
 from pydantic import BaseModel
 
-from app.asr_client import voice2text
+from app.celery_config import celery_app
 from app.config import REDIS_CLIENT as r
 
 app = FastAPI()
@@ -19,7 +19,7 @@ async def start_asr_process(request: AudioRequest, background_tasks: BackgroundT
     task_id = str(uuid.uuid4())
     r.set(task_id, "正在处理中")  # 设置任务状态
     data = {"task_id": task_id, "audio_url": request.audio_url}
-    background_tasks.add_task(voice2text,  task_id=task_id,wav=request.audio_url)
+    celery_app.send_task('app.asr_client.voice2text', args=[task_id, request.audio_url])
     return data
 
 @app.get("/result/{task_id}")
