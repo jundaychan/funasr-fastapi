@@ -1,37 +1,15 @@
-import json
-import uuid
 
-from fastapi import FastAPI, BackgroundTasks
-from pydantic import BaseModel
+from fastapi import FastAPI
+from app.api import router
 
-from app.celery_config import celery_app
-from app.config import REDIS_CLIENT as r
-
-app = FastAPI()
+app = FastAPI(
+    title="asr服务",
+    version="0.0.1"
+)
 
 
-class AudioRequest(BaseModel):
-    audio_url: str
+app.include_router(router)
 
-
-@app.post("/asr/start")
-async def start_asr_process(request: AudioRequest, background_tasks: BackgroundTasks):
-    task_id = str(uuid.uuid4())
-    r.set(task_id, "正在处理中")  # 设置任务状态
-    data = {"task_id": task_id, "audio_url": request.audio_url}
-    celery_app.send_task('app.asr_client.voice2text', args=[task_id, request.audio_url])
-    return data
-
-@app.get("/result/{task_id}")
-async def get_result(task_id: str):
-    result = r.get(task_id)
-    if not result:
-        return {"code": "-1", "status": "任务ID未找到"}
-    if result != "正在处理中":
-        result = json.loads(result)
-        return {"code": "0", "status": "已完成", "result": result}
-    else:
-        return {"code": "-1", "status": "正在处理中"}
 
 
 # 在主模块保护下初始化全局变量和启动应用
