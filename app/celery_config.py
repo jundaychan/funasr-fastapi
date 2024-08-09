@@ -24,7 +24,12 @@ celery_app.conf.update(
     task_routes={
         'app.asr_client.voice2text': {'queue': 'asr_queue'},  # 定义任务路由
     },
-    worker_hijack_root_logger=False,  # 不劫持根日志器
-    worker_log_format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',  # 自定义日志格式
-    worker_task_log_format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',  # 自定义任务日志格式
+    task_default_expires = timedelta(hours=1),
+    # 日志配置
+    worker_hijack_root_logger = False,
+    worker_log_format = '%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    worker_task_log_format = '%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    worker_redirect_stdouts = True,
+    worker_redirect_stdouts_level = 'INFO',
 )
+
