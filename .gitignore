@@ -1,0 +1,11 @@
+.idea
+./__pycache__/
+*/__pycache__/
+*/*/__pycache__/
+*/*/*/__pycache__/
+.DS_Store
+init_model/
+*.tar.gz
+.env
+log/
+.venv/

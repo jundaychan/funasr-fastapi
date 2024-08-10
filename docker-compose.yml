@@ -1,0 +1,26 @@
+version: '3.11'
+
+services:
+  api:
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+    depends_on:
+      - asr-redis
+
+  celery:
+    build: .
+    command: ["celery", "-A", "app.celery_config.celery_app", "worker", "--loglevel=info", "--concurrency=8", "-Q", "celery,asr_queue","--logfile=/asr/log/celery.log"]
+    volumes:
+      - .:/asr
+      - ./log:/asr/log
+    depends_on:
+      - asr-redis
+
+
+  asr-redis:
+    image: "redis:alpine"
+    ports:
+      - "6380:6379"
