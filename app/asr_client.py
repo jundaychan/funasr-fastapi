@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 import ssl,websockets
 import wave
 import asyncio
@@ -78,7 +80,6 @@ async def asr_client(task_id,wav_url):
                     await websocket.send(message)
                 await asyncio.sleep(0.001)
             response = await websocket.recv()
-            print(f"Received: {response}")
             r.set(task_id, response, ex=3600)  # 键在 1 小时后自动过期
         except:
             r.set(task_id, "任务失败", ex=3600)
