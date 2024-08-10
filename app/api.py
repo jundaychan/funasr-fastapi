@@ -1,4 +1,5 @@
 import json
+import re
 
 from fastapi import APIRouter
 import uuid
@@ -35,4 +36,9 @@ async def get_result(task_id: str):
         return {"code": 200, "status": 3,"status_str":"failed"}
     else:
         result = json.loads(result)
+        # 使用正则表达式去除所有非ASCII字符
+        clean_text = re.sub(r'[^\x00-\x7F]+', '', result["text"])
+
+        # 更新数据
+        result["text"] = clean_text
         return {"code": 200, "status": 2, "result": result,"status_str":"failed"}
